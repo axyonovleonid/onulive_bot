@@ -37,7 +37,7 @@ if "HEROKU" in list(os.environ.keys()):
             request.abort(403)
 
 
-    bot.remove_webhook()
+    bot.set_webhook()
     time.sleep(1)
     bot.set_webhook(url='onulive-bot.herokuapp.com' + WEBHOOK_URL_PATH)
 
