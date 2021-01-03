@@ -1,4 +1,6 @@
 import enum
+import logging
+
 import telebot
 import os
 from flask import Flask, request
@@ -10,24 +12,31 @@ class State(enum.Enum):
 
 
 bot = telebot.TeleBot('1434687229:AAGOTUvkeFy7dqx7zIrY6kPBxJ2IcxIDa5s')
-server = Flask(__name__)
+
+if "HEROKU" in list(os.environ.keys()):
+    logger = telebot.logger
+    telebot.logger.setLevel(logging.INFO)
+    server = Flask(__name__)
 
 
-@server.route("/bot", methods=['POST'])
-def getMessage():
-    bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
-    return "!", 200
+    @server.route("/bot", methods=['POST'])
+    def get_message():
+        bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
+        return "!", 200
 
 
-@server.route("/")
-def webhook():
+    @server.route("/")
+    def webhook():
+        bot.remove_webhook()
+        bot.set_webhook(
+            url="https://onulive-bot.herokuapp.com/bot")  # этот url нужно заменить на url вашего Хероку приложения
+        return "?", 200
+
+
+    server.run(host="0.0.0.0", port=os.environ.get('PORT', 80))
+else:
     bot.remove_webhook()
-    bot.set_webhook(
-        url="https://onulive-bot.herokuapp.com/")  # этот url нужно заменить на url вашего Хероку приложения
-    return "?", 200
-
-
-server.run(host="0.0.0.0", port=os.environ.get('PORT', 80))
+    bot.polling(none_stop=True)
 
 keyboard1 = telebot.types.ReplyKeyboardMarkup(True, True)
 # keyboard1.row("Расписание пар", 'Звонки', 'Карта интернетов')
@@ -143,5 +152,3 @@ def button1(message):
             states[message.chat.id] = State.default
             bot.forward_message(chat_id="-1001289477077", from_chat_id=message.chat.id, message_id=message.message_id)
             bot.send_message(message.chat.id, "Кабанчк отправлен")
-
-#       bot.send_message(chat_id='-1001289477077', text=message)
