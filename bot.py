@@ -1,5 +1,6 @@
 import enum
 import os
+import time
 
 import telebot
 from flask import Flask, request
@@ -35,6 +36,10 @@ if "HEROKU" in list(os.environ.keys()):
         else:
             request.abort(403)
 
+
+    bot.remove_webhook()
+    time.sleep(1)
+    bot.set_webhook(url='onulive-bot.herokuapp.com' + WEBHOOK_URL_PATH)
 
     server.run(host="0.0.0.0", port=os.environ.get('PORT', 8443))
 else:
