@@ -24,7 +24,6 @@ if "HEROKU" in list(os.environ.keys()):
 
     @server.route("/")
     def webhook():
-        bot.remove_webhook()
         bot.set_webhook(
             url="https://onulive-bot.herokuapp.com/bot")  # этот url нужно заменить на url вашего Хероку приложения
         return "?", 200
@@ -32,7 +31,6 @@ if "HEROKU" in list(os.environ.keys()):
 
     server.run(host="0.0.0.0", port=os.environ.get('PORT', 80))
 else:
-    bot.remove_webhook()
     bot.polling(none_stop=True)
 
 keyboard1 = telebot.types.ReplyKeyboardMarkup(True, True)
