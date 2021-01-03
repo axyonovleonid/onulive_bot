@@ -1,8 +1,7 @@
 import enum
-import logging
+import os
 
 import telebot
-import os
 from flask import Flask, request
 
 
@@ -14,8 +13,6 @@ class State(enum.Enum):
 bot = telebot.TeleBot('1434687229:AAGOTUvkeFy7dqx7zIrY6kPBxJ2IcxIDa5s')
 
 if "HEROKU" in list(os.environ.keys()):
-    logger = telebot.logger
-    telebot.logger.setLevel(logging.INFO)
     server = Flask(__name__)
 
 
@@ -51,11 +48,13 @@ keyboard1.row("Об общежитиях", "Документация/FAQ")
 keyboard1.row("Связь", "Фидбек")
 keyboard1.row('SEND NUDES')
 
+back_text = "Назад"
+
 faculties = telebot.types.ReplyKeyboardMarkup(True, False)
 faculties.row("БИОФАК", "ГГФ", "ЭПФ", "ИСТФАК")
 faculties.row("ЖУРФАК", "МФИТ", "МОПС", "ФПСР")
-back_text = "Назад"
 faculties.row("РГФ", "ФИЛФАК", "ХИМФАК", back_text)
+
 
 dorms = telebot.types.ReplyKeyboardMarkup(True, False)
 dorms.row("Общежитие №1", "Общежитие №2", "Общежитие №3")
