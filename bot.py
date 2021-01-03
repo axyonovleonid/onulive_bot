@@ -4,13 +4,16 @@ import os
 import telebot
 from flask import Flask, request
 
+API_TOKEN = os.environ.get('TOKEN')
+WEBHOOK_URL_PATH = "/{}/".format(API_TOKEN)
+
 
 class State(enum.Enum):
     default = 0
     forward = 1
 
 
-bot = telebot.TeleBot('1434687229:AAGOTUvkeFy7dqx7zIrY6kPBxJ2IcxIDa5s')
+bot = telebot.TeleBot(API_TOKEN)
 
 if "HEROKU" in list(os.environ.keys()):
     server = Flask(__name__)
@@ -22,14 +25,18 @@ if "HEROKU" in list(os.environ.keys()):
         return "!", 200
 
 
-    @server.route("/")
+    @server.route(WEBHOOK_URL_PATH, methods=['POST'])
     def webhook():
-        bot.set_webhook(
-            url="https://onulive-bot.herokuapp.com/bot")  # этот url нужно заменить на url вашего Хероку приложения
-        return "?", 200
+        if request.headers.get('content-type') == 'application/json':
+            json_string = request.get_data().decode('utf-8')
+            update = telebot.types.Update.de_json(json_string)
+            bot.process_new_updates([update])
+            return ''
+        else:
+            request.abort(403)
 
 
-    server.run(host="0.0.0.0", port=os.environ.get('PORT', 80))
+    server.run(host="0.0.0.0", port=os.environ.get('PORT', 8443))
 else:
     bot.polling(none_stop=True)
 
@@ -52,7 +59,6 @@ faculties = telebot.types.ReplyKeyboardMarkup(True, False)
 faculties.row("БИОФАК", "ГГФ", "ЭПФ", "ИСТФАК")
 faculties.row("ЖУРФАК", "МФИТ", "МОПС", "ФПСР")
 faculties.row("РГФ", "ФИЛФАК", "ХИМФАК", back_text)
-
 
 dorms = telebot.types.ReplyKeyboardMarkup(True, False)
 dorms.row("Общежитие №1", "Общежитие №2", "Общежитие №3")
