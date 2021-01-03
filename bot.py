@@ -23,7 +23,7 @@ def getMessage():
 def webhook():
     bot.remove_webhook()
     bot.set_webhook(
-        url="https://dashboard.heroku.com/apps/onulive-bot")  # этот url нужно заменить на url вашего Хероку приложения
+        url="https://onulive-bot.herokuapp.com/")  # этот url нужно заменить на url вашего Хероку приложения
     return "?", 200
 
 
