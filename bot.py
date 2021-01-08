@@ -1,12 +1,11 @@
 import enum
 import os
-import time
 
 import telebot
 from flask import Flask, request
 
-API_TOKEN = os.environ.get('TOKEN')
-WEBHOOK_URL_PATH = "/{}/".format(API_TOKEN)
+# API_TOKEN = os.environ.get('TOKEN')
+API_TOKEN = '1434687229:AAGOTUvkeFy7dqx7zIrY6kPBxJ2IcxIDa5s'
 
 
 class State(enum.Enum):
@@ -15,34 +14,7 @@ class State(enum.Enum):
 
 
 bot = telebot.TeleBot(API_TOKEN)
-
-if "HEROKU" in list(os.environ.keys()):
-    server = Flask(__name__)
-
-
-    @server.route("/bot", methods=['POST'])
-    def get_message():
-        bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
-        return "!", 200
-
-
-    @server.route(WEBHOOK_URL_PATH, methods=['POST'])
-    def webhook():
-        if request.headers.get('content-type') == 'application/json':
-            json_string = request.get_data().decode('utf-8')
-            update = telebot.types.Update.de_json(json_string)
-            bot.process_new_updates([update])
-            return ''
-        else:
-            request.abort(403)
-
-
-    time.sleep(1)
-    bot.set_webhook(url='onulive-bot.herokuapp.com' + WEBHOOK_URL_PATH)
-
-    server.run(host="0.0.0.0", port=os.environ.get('PORT', 8443))
-else:
-    bot.polling(none_stop=True)
+server = Flask(__name__)
 
 keyboard1 = telebot.types.ReplyKeyboardMarkup(True, True)
 # keyboard1.row("Расписание пар", 'Звонки', 'Карта интернетов')
@@ -95,8 +67,8 @@ connections_markup.row(back_text)
 states = {}
 
 
-@bot.message_handler(content_types=['text'])
-def button1(message):
+@bot.message_handler(func=lambda message: True, content_types=['text'])
+def processMessage(message):
     if message.chat.id not in states:
         states[message.chat.id] = State.default
 
@@ -159,3 +131,23 @@ def button1(message):
             states[message.chat.id] = State.default
             bot.forward_message(chat_id="-1001289477077", from_chat_id=message.chat.id, message_id=message.message_id)
             bot.send_message(message.chat.id, "Кабанчк отправлен")
+
+
+@server.route("/{}".format(API_TOKEN), methods=['POST'])
+def getMessage():
+    # update = telebot.types.Update.de_json(request.get_json(force=True))
+    #  processMessage(update.message)
+    bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
+    return "!", 200
+
+
+@server.route("/")
+def webhook():
+    bot.remove_webhook()
+    # bot.set_webhook(url='https://5e9ada621829.ngrok.io/' + API_TOKEN)
+    bot.set_webhook(url="https://onulive-bot.herokuapp.com/bot/{}".format(API_TOKEN))
+    return "!", 200
+
+
+if __name__ == "__main__":
+    server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 8080)))
