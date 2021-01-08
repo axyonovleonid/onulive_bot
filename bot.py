@@ -145,7 +145,7 @@ def getMessage():
 def webhook():
     bot.remove_webhook()
     # bot.set_webhook(url='https://5e9ada621829.ngrok.io/' + API_TOKEN)
-    bot.set_webhook(url="https://onulive-bot.herokuapp.com/bot/{}".format(API_TOKEN))
+    bot.set_webhook(url="https://onulive-bot.herokuapp.com/{}".format(API_TOKEN))
     return "!", 200
 
 
